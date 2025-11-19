@@ -5,18 +5,18 @@ public class Cell {
     public final int N = 100; //население ячейки
 
     public  Cell(){
-        S=N-1;
-        I=1;
-        E=R=D=0;
+        reset();
 
     }
 
     public void reset(){
-        S=N-1;
-        I=1;
-        E=R=D=0;
+        S = N;  //все здоровы
+        I = 0;
+        E = 0;
+        R = 0;
+        D = 0;
     }
-    public int getTotakInfected(){return(int)(E+I);}
-    public int getTotalDead(){return (int) D;}
+    public int getTotalInfected(){ return (int) (E + I);}
+    public int getTotalDead(){ return (int) D;}
 
 }
