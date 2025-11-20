@@ -100,7 +100,7 @@ public class SimulationEngine {
 
                     dI[i][j] -= (recFlow + deathFlow);
                     dR[i][j] += recFlow;
-                    dR[i][j] += deathFlow;
+                    dD[i][j] += deathFlow;
                 }
             }
         }
@@ -108,10 +108,82 @@ public class SimulationEngine {
 
         int [][] dirs = {{0,1}, {1, 0}, {0, -1}, {-1, 0}};
 
+        for (int i = 0; i < n; i++){
+            for (int j = 0; j < n; j++){
+                Cell src = grid.get(i, j);
+                if (src.I <= 0)continue;
 
+                for (int[] d : dirs){
+                    int ni = i + d[0];
+                    int nj = j + d[1];
+                    if (ni < 0 || ni >= n || nj < 0 || nj >= n) continue;
+
+                    Cell dst = grid.get(ni, nj);
+                    if (dst.S <= 0) continue;
+
+                    double Sdst = dst.S;
+                    double lambdaNeigh = beta * neighK * src.I / src.N;
+                    double newExpN = lambdaNeigh * Sdst * dt;
+
+                    if (newExpN > Sdst) newExpN = Sdst;
+
+                    if (useSEIR) {
+                        dS[ni][nj] -= newExpN;
+                        dE[ni][nj] += newExpN;
+                    } else{
+                        dS[ni][nj] -= newExpN;
+                        dI[ni][nj] += newExpN;
+                    }
+
+                }
+            }
+        }
+        // Применяем превращение
+        for (int i = 0; i < n; i++){
+            for (int j = 0; j < n; j++){
+                Cell c = grid.get(i, j);
+                c.S += dS[i][j];
+                c.E += dE[i][j];
+                c.I += dI[i][j];
+                c.R += dR[i][j];
+                c.D += dD[i][j];
+
+                // удалить "мусор"
+            }
+        }
     }
 
     private void record() {
+        double S = 0, E =0, I = 0, R = 0, D = 0;
+        int size = grid.getSize();
+        int total = size * size * 100; // N = 100 в каждой клетке
+
+        for (int i = 0; i < size; i++){
+            for (int j = 0; j < size; j++){
+                Cell c = grid.get(i, j);
+
+                S += c.S;
+                E += c.E;
+                I += c.I;
+                R += c.R;
+                D += c.D;
+            }
+            history.add(new double[] {time, S/total, E/total, I/total, R/total, D/total});
+
+        }
     }
+    public PopulationGrid getGrid(){return grid;}
+
+    public List<double[]> getHistory() {return history;}
+
+    public void reset(){
+        grid.reset();
+        history.clear();
+        time = 0;
+        record();
+    }
+
+    public double getTime() {return time;}
+
 
 }
