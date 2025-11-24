@@ -9,8 +9,8 @@ public class SimulationEngine {
     private final List<double[]> history = new ArrayList<>();
     private double time = 0;
 
-    public SimulationEngine(PopulationGrid grid, Parameters params) {
-        this.grid = grid;
+    public SimulationEngine(int size, Parameters params) {
+        this.grid = new PopulationGrid(size);
         this.params = params;
         record ();
     }
